@@ -65,19 +65,19 @@ plt.show()
 
 # Contingency table of game location vs game result in 2010 season
 location_result_freq = pd.crosstab(nba_2010.game_location, nba_2010.game_result)
-print('Contingency Table of Game Location vs Game Result (2010 Season):\n')
+print('\nContingency Table of Game Location vs Game Result (2010 Season):\n')
 print(location_result_freq)
 
 # Proportions table
 location_result_proportions = location_result_freq/len(location_result_freq)
-print('Proportions Table of Game Location vs Game Result (2010 Season):\n')
+print('\nProportions Table of Game Location vs Game Result (2010 Season):\n')
 print(location_result_proportions)
 
 # Chi-squared test of independence
 chi2, pval, dof, expected = chi2_contingency(location_result_freq)
-print('Chi-squared Test Results (2010 Season):\n')
-print(chi2)
-print(pval)
+print('\nChi-squared Test Results (2010 Season):')
+print('Chi2 Statistic:', chi2)
+print('p-value:', pval)
 print('Expected Frequencies:\n')
 print(expected)
 
@@ -88,7 +88,7 @@ print(point_diff_forecast_cov)
 
 point_diff_forecast_corr, p = pearsonr(nba_2010.forecast, nba_2010.point_diff) 
 print('\nPearson Correlation between Forecasted Win Prob. and Point Differential (2010 Season):\n')
-print(point_diff_forecast_corr)
+print('Correlation Coefficient:', point_diff_forecast_corr)
 
 # Scatter plot of forecasted win probability vs point differential in 2010 season
 plt.scatter(nba_2010['forecast'], nba_2010['point_diff'])
@@ -96,3 +96,4 @@ plt.xlabel('Forecasted Win Prob.')
 plt.ylabel('Point Differential')
 plt.title('2010 Season: Forecasted Win Prob. vs Point Differential')
 plt.show()
+plt.clf()
