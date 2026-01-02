@@ -91,5 +91,3 @@ python nba_trends_analysis.py
   - Add unit tests to validate the numeric summaries.
 
 ---
-
-If you want the README updated (formatting, more explanation, or additional plots), tell me which sections to expand. 👇
