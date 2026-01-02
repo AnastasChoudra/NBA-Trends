@@ -26,8 +26,8 @@ print(diff_means_2010)
 
 #diff_means_2010 = np.mean(knicks_pts_10) - np.mean(nets_pts_10) #alternative
 
-plt.hist(knicks_pts_10, alpha=0.5, normed=True, label='Knicks')
-plt.hist(nets_pts_10, alpha=0.5, normed=True, label='Nets')
+plt.hist(knicks_pts_10, alpha=0.5, density=True, label='Knicks')
+plt.hist(nets_pts_10, alpha=0.5, density=True, label='Nets')
 plt.legend()
 plt.title('2010 Season')
 plt.show()
@@ -39,8 +39,8 @@ nets_pts_14 = nba_2014.pts[nba_2014['fran_id'] == 'Nets']
 diff_means_2014 = knicks_pts_14.mean() - nets_pts_14.mean()
 print(diff_means_2014)
 
-plt.hist(knicks_pts_14, alpha=0.5, normed=True, label='Knicks')
-plt.hist(nets_pts_14, alpha=0.5, normed=True, label='Nets')
+plt.hist(knicks_pts_14, alpha=0.5, density=True, label='Knicks')
+plt.hist(nets_pts_14, alpha=0.5, density=True, label='Nets')
 plt.legend()
 plt.title('2014 Season')
 plt.show()
