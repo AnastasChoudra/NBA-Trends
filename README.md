@@ -82,12 +82,3 @@ python nba_trends_analysis.py
 3. The script prints summaries and saves plots to the `figures/` folder.
 
 ---
-
-## Notes & next steps
-
-- The script prints p-values and effect sizes; always consider both statistical significance and effect size when interpreting results.
-- If you'd like, I can:
-  - Add an automated report (Markdown or HTML) that includes the tables and the figures, or
-  - Add unit tests to validate the numeric summaries.
-
----
