@@ -3,7 +3,7 @@ Refactored analysis with functions, validation, better plotting, and statistical
 """
 
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Optional
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -71,11 +71,12 @@ def _interpret_cohens_d(d: float) -> str:
     return "large"
 
 
-def compare_team_points(df: pd.DataFrame, year: int, team1: str, team2: str, bins: int = 20) -> dict:
+def compare_team_points(df: pd.DataFrame, year: int, team1: str, team2: str, bins: int = 20, save_dir: Optional[Path] = None) -> dict:
     """Compare points between two teams in a given year.
 
     Prints descriptive statistics and a statistical test, plots distributions,
-    and returns a dict of numeric results for summary/interpretation.
+    optionally saves the plot to `save_dir`, and returns a dict of numeric
+    results for summary/interpretation.
     """
     # Safely extract point series for each team
     a = team_points(df, year, team1)
@@ -107,7 +108,16 @@ def compare_team_points(df: pd.DataFrame, year: int, team1: str, team2: str, bin
     plt.title(f"{year}: {team1} vs {team2} Points (density)")
     plt.xlabel('Points')
     plt.tight_layout()
+
+    fig_path = None
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        fig_path = save_dir / f"{year}_{team1}_vs_{team2}_points.png"
+        plt.savefig(fig_path, dpi=150)
+        print(f"  Saved density plot to: {fig_path}")
+
     plt.show()
+    plt.close()
 
     # Return results for later summary
     return {
@@ -121,17 +131,32 @@ def compare_team_points(df: pd.DataFrame, year: int, team1: str, team2: str, bin
         'p_value': pval,
         'cohens_d': d,
         'cohens_d_label': _interpret_cohens_d(d),
+        'fig_path': str(fig_path) if fig_path is not None else None,
     }
 
 
-def boxplot_by_franchise(df: pd.DataFrame, year: int):
+def boxplot_by_franchise(df: pd.DataFrame, year: int, save_dir: Optional[Path] = None) -> Optional[str]:
+    """Create a boxplot of points by franchise for a given year.
+
+    Optionally save the plot to `save_dir` and return the saved path.
+    """
     df_y = df[df.year_id == year]
     plt.figure(figsize=(10, 6))
     sns.boxplot(data=df_y, y='pts', x='fran_id')
     plt.title(f"{year} Points by Franchise")
     plt.xticks(rotation=45)
     plt.tight_layout()
+
+    fig_path = None
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        fig_path = save_dir / f"{year}_points_by_franchise_boxplot.png"
+        plt.savefig(fig_path, dpi=150)
+        print(f"  Saved boxplot to: {fig_path}")
+
     plt.show()
+    plt.close()
+    return str(fig_path) if fig_path is not None else None
 
 
 def contingency_analysis(df: pd.DataFrame, year: int) -> dict:
@@ -185,10 +210,11 @@ def _interpret_corr(r: float) -> str:
     return "strong"
 
 
-def correlation_analysis(df: pd.DataFrame, year: int) -> dict:
+def correlation_analysis(df: pd.DataFrame, year: int, save_dir: Optional[Path] = None) -> dict:
     """Compute and display correlation between forecast and point differential.
 
-    Returns correlation coefficient and p-value for later summary.
+    Returns correlation coefficient and p-value for later summary. Optionally
+    saves the regression scatter plot to `save_dir`.
     """
     df_y = df[df.year_id == year][['forecast', 'point_diff']].dropna()
     if len(df_y) < 2:
@@ -210,7 +236,16 @@ def correlation_analysis(df: pd.DataFrame, year: int) -> dict:
     plt.xlabel('Forecasted Win Probability')
     plt.ylabel('Point Differential')
     plt.tight_layout()
+
+    fig_path = None
+    if save_dir is not None:
+        save_dir.mkdir(parents=True, exist_ok=True)
+        fig_path = save_dir / f"{year}_forecast_vs_pointdiff.png"
+        plt.savefig(fig_path, dpi=150)
+        print(f"  Saved correlation plot to: {fig_path}")
+
     plt.show()
+    plt.close()
 
     return {
         'year': year,
@@ -219,6 +254,7 @@ def correlation_analysis(df: pd.DataFrame, year: int) -> dict:
         'pearson_r': corr,
         'p_value': pval,
         'corr_label': _interpret_corr(corr),
+        'fig_path': str(fig_path) if fig_path is not None else None,
     }
 
 
@@ -274,24 +310,28 @@ def main(data_path: Path = DATA_FILENAME):
 
     results = {}
 
-    # Analyze seasons and collect numeric summaries
+    # Create directory for figures and analyze seasons
+    fig_dir = Path(__file__).parent / "figures"
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
     for year in (2010, 2014):
         print(f"\n--- Analysis for {year} ---")
         results[year] = {}
 
         # Team comparisons (returns a dict)
-        tp = compare_team_points(nba, year, 'Knicks', 'Nets')
+        tp = compare_team_points(nba, year, 'Knicks', 'Nets', save_dir=fig_dir)
         results[year]['team_comparison'] = tp
 
-        # Boxplot (visual only)
-        boxplot_by_franchise(nba, year)
+        # Boxplot (saved to figures)
+        bp_path = boxplot_by_franchise(nba, year, save_dir=fig_dir)
+        results[year]['boxplot_path'] = bp_path
 
         # Contingency
         cont = contingency_analysis(nba, year)
         results[year]['contingency'] = cont
 
-        # Correlation
-        corr = correlation_analysis(nba, year)
+        # Correlation (saved to figures)
+        corr = correlation_analysis(nba, year, save_dir=fig_dir)
         results[year]['correlation'] = corr
 
     # Print final interpretation/summary based on collected metrics
